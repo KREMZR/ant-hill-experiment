@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ant hill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="view" aria-label="A patch of ground with an ant colony"></canvas>
+
+<header class="panel colony">
+  <h1>Ant hill</h1>
+  <p class="colony-sub">Black garden ants, <span id="c-day" title="The colony's life cycle is sped up so you can watch it grow. Walking and pheromones run in real time.">day 1</span></p>
+  <dl class="readout">
+    <div><dt>Workers</dt><dd id="c-workers">0</dd></div>
+    <div><dt>On the surface</dt><dd id="c-out">0</dd></div>
+    <div><dt>Loads brought home</dt><dd id="c-delivered">0</dd></div>
+    <div><dt>Brood</dt><dd id="c-brood">0</dd></div>
+  </dl>
+  <div class="reserve">
+    <div class="reserve-head"><span>Food reserve</span><span id="c-reserve-text">hungry</span></div>
+    <div class="reserve-bar"><span id="c-reserve-fill"></span></div>
+  </div>
+</header>
+
+<div class="corner">
+  <button class="pill" id="btn-trail" aria-pressed="false" title="Show the pheromone trails (P)">
+    <span class="dot"></span>Pheromone view
+  </button>
+  <button class="pill" id="btn-about">About the model</button>
+  <button class="pill" id="btn-new">New colony</button>
+</div>
+
+<aside class="panel inspector" id="inspector" hidden>
+  <div class="inspector-head">
+    <h2 id="i-name">Ant</h2>
+    <button class="icon-btn" id="i-close" aria-label="Stop watching this ant">
+      <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <p class="doing" id="i-doing"></p>
+  <dl class="facts">
+    <div><dt>Carrying</dt><dd id="i-carry"></dd></div>
+    <div><dt>Loads brought home</dt><dd id="i-trips"></dd></div>
+    <div><dt>Speed</dt><dd id="i-speed"></dd></div>
+    <div><dt>From the nest</dt><dd id="i-dist"></dd></div>
+    <div><dt>Its sense of home is off by</dt><dd id="i-err"></dd></div>
+    <div><dt>Remembers food</dt><dd id="i-mem"></dd></div>
+  </dl>
+  <div class="scent">
+    <div class="scent-head">Trail scent at its antennae</div>
+    <div class="scent-bars">
+      <div><span id="i-sl"></span><em>left</em></div>
+      <div><span id="i-sc"></span><em>ahead</em></div>
+      <div><span id="i-sr"></span><em>right</em></div>
+    </div>
+  </div>
+  <div class="inspector-actions">
+    <button class="pill" id="i-follow" aria-pressed="false">Follow it</button>
+    <button class="pill" id="i-sense" aria-pressed="true">Show what it senses</button>
+  </div>
+</aside>
+
+<div class="dock">
+  <div class="panel tools" role="toolbar" aria-label="Tools">
+    <button class="tool" data-tool="look" aria-pressed="true" title="Look around; click an ant to watch it (1)">
+      <svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5"/></svg><span>Look</span>
+    </button>
+    <button class="tool" data-tool="sugar" aria-pressed="false" title="Put down a drop of sugar water (2)">
+      <svg viewBox="0 0 24 24"><path d="M12 3.5c3.2 4.3 5.5 7.4 5.5 10.6a5.5 5.5 0 0 1-11 0C6.5 10.9 8.8 7.8 12 3.5z"/></svg><span>Sugar<span class="wide"> drop</span></span>
+    </button>
+    <button class="tool" data-tool="crumbs" aria-pressed="false" title="Scatter crumbs (3)">
+      <svg viewBox="0 0 24 24"><path d="M5 9l3-2 3 2-1 3H6zM14 6l3 1 1 3-3 1-2-2zM11 15l3-1 3 2-1 3-4 0z"/></svg><span>Crumbs</span>
+    </button>
+    <button class="tool" data-tool="rock" aria-pressed="false" title="Put a rock in the way (4)">
+      <svg viewBox="0 0 24 24"><path d="M4 16l2.5-7L12 5.5l6 2.5 2.5 7-3 3.5H7z"/><path d="M9 10l3 2 4-2"/></svg><span>Rock</span>
+    </button>
+    <button class="tool" data-tool="remove" aria-pressed="false" title="Take away food or a rock (5)">
+      <svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4.5h4V7M7 7l1 12.5h8L17 7M10.5 10.5v6M13.5 10.5v6"/></svg><span>Remove</span>
+    </button>
+    <button class="tool" data-tool="disturb" aria-pressed="false" title="Tap the ground and alarm nearby ants (6)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M12 6a6 6 0 0 1 6 6M12 18a6 6 0 0 1-6-6M12 2.5a9.5 9.5 0 0 1 9.5 9.5M12 21.5A9.5 9.5 0 0 1 2.5 12"/></svg><span>Disturb</span>
+    </button>
+  </div>
+  <div class="panel time" role="group" aria-label="Time">
+    <button class="icon-btn play" id="btn-pause" aria-label="Pause" title="Pause or resume (space)">
+      <svg class="i-pause" viewBox="0 0 16 16" width="16" height="16"><path d="M4.5 3v10M11.5 3v10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <svg class="i-play" viewBox="0 0 16 16" width="16" height="16"><path d="M5 3l8 5-8 5z" fill="currentColor"/></svg>
+    </button>
+    <div class="speeds" id="speeds">
+      <button data-speed="1" aria-pressed="true">1×</button>
+      <button data-speed="4" aria-pressed="false">4×</button>
+      <button data-speed="16" aria-pressed="false">16×</button>
+      <button data-speed="60" aria-pressed="false">60×</button>
+      <button data-speed="240" aria-pressed="false">240×</button>
+    </div>
+    <span class="clock" id="clock" title="Time watched so far">0:00</span>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<div class="loading" id="loading">
+  <div class="loading-box">
+    <p id="loading-text">Laying out the ground</p>
+    <div class="loading-bar" id="loading-bar" hidden><span id="loading-fill"></span></div>
+    <button class="pill" id="loading-skip" hidden>Stop catching up</button>
+  </div>
+</div>
+
+<dialog id="about" class="sheet">
+  <div class="sheet-head">
+    <h2>About the model</h2>
+    <button class="icon-btn" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="sheet-body">
+    <p>This is 1.4 by 0.9 metres of ground with one colony of black garden ants, <i>Lasius niger</i>. Everything is to scale: a worker is about 4 mm long and walks at roughly 18 mm a second.</p>
+    <p>No ant is told where the food is, and nothing in the program draws a trail. Each ant follows a few local rules taken from published studies, and the trails, the rush to a new food source and the way round a rock all come out of that.</p>
+
+    <h3>What each ant does</h3>
+    <ul>
+      <li><b>Smells with two antennae.</b> It compares the trail pheromone at its left and right antenna and turns toward the stronger side. The turn depends on the relative difference, not the absolute one.</li>
+      <li><b>Keeps count of its own steps and turns.</b> This running estimate of where the nest is, called path integration, is how it gets home. It is accurate to a few percent, so far from home the estimate drifts. Select an ant to see it.</li>
+      <li><b>Marks a trail only when the trip paid off.</b> On the way home with food it dabs pheromone from the tip of its abdomen. Better food makes marking more likely. It marks less on a trail that is already strong.</li>
+      <li><b>Remembers one food site.</b> A forager that found food goes straight back to it, and trusts that memory over the trail. After two empty visits it gives up on the site.</li>
+      <li><b>Recruits nestmates.</b> A forager that marked the trail stirs others into leaving. At the entrance each recruit picks a direction with odds that rise steeply with the pheromone there.</li>
+      <li><b>Walks on an alternating tripod.</b> Front and hind leg on one side move with the middle leg on the other. Zoomed in, each foot stays planted while the body passes over it.</li>
+      <li><b>Stops to check other ants.</b> Ants that meet head-on often pause and touch antennae before passing.</li>
+    </ul>
+
+    <h3>What is simplified</h3>
+    <ul>
+      <li>The inside of the nest is not drawn. Food storage, the queen, brood and resting workers are tracked as numbers.</li>
+      <li>The colony's life cycle runs 300 times faster than the ants' behaviour, so you can watch it grow. One colony day lasts about five minutes at 1× speed.</li>
+      <li>An ant's brain is not simulated. Its decisions are rules whose outcomes match what has been measured, with strengths tuned where no measurement exists.</li>
+      <li>There is no weather, no day and night, no predators and no rival colonies.</li>
+    </ul>
+
+    <h3>Saving</h3>
+    <p>The colony is saved in this browser every few seconds. Close the page and it will be here when you come back, having lived through the time you were away, up to six hours of it. A colony you paused stays exactly as you left it. The save is not shared with other browsers or devices, and starting a new colony replaces it.</p>
+
+    <h3>Studies the rules are based on</h3>
+    <ul class="sources">
+      <li>Beckers, Deneubourg and Goss (1992, 1993). Trail laying, U-turns and trail lifetime in <i>Lasius niger</i>.</li>
+      <li>Deneubourg, Aron, Goss and Pasteels (1990). The choice function for picking between trails.</li>
+      <li>Perna and others (2012). Individual rules for trail following; the response follows Weber's law.</li>
+      <li>Grüter, Czaczkes and Ratnieks (2011). Foragers trust their own memory over the trail.</li>
+      <li>Czaczkes, Grüter and Ratnieks (2013). Ants mark less on busy, well-marked trails.</li>
+      <li>Mailleux, Deneubourg and Detrain (2000). Scouts mark only after getting a full load.</li>
+      <li>Müller and Wehner (1988); Wittlinger, Wehner and Wolf (2006). Path integration and step counting.</li>
+      <li>Zollikofer (1994). Stepping patterns of walking ants.</li>
+      <li>Bossert and Wilson (1963). How far and how long an alarm signal carries.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog id="newcolony" class="sheet narrow">
+  <div class="sheet-head">
+    <h2>New colony</h2>
+    <button class="icon-btn" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" width="14" height="14"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <form class="sheet-body" id="new-form" method="dialog">
+    <label>Colony size
+      <select id="n-size">
+        <option value="400">Young, 400 workers</option>
+        <option value="1200" selected>Established, 1,200 workers</option>
+        <option value="3500">Large, 3,500 workers</option>
+        <option value="8000">Mature, 8,000 workers</option>
+      </select>
+    </label>
+    <label>How long a trail lasts
+      <select id="n-life">
+        <option value="2820" selected>47 minutes, as measured</option>
+        <option value="900">15 minutes</option>
+        <option value="300">5 minutes</option>
+      </select>
+    </label>
+    <label class="check"><input type="checkbox" id="n-natural" checked> Food turns up by itself now and then</label>
+    <label class="check"><input type="checkbox" id="n-same"> Keep the same ground</label>
+    <p class="note">This replaces the colony saved in this browser.</p>
+    <button class="primary" type="submit">Start the colony</button>
+  </form>
+</dialog>
+
+<script src="js/config.js"></script>
+<script src="js/rng.js"></script>
+<script src="js/world.js"></script>
+<script src="js/ants.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/render-ground.js"></script>
+<script src="js/render.js"></script>
+<script src="js/save.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
