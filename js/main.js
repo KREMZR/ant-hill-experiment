@@ -464,6 +464,11 @@
   $('btn-trail').addEventListener('click', function () { setTrailView(!renderer.showTrail); });
   $('btn-about').addEventListener('click', function () { $('about').showModal(); });
   $('btn-new').addEventListener('click', function () { $('newcolony').showModal(); });
+  $('c-fold').addEventListener('click', function () {
+    var folded = document.querySelector('.colony').classList.toggle('folded');
+    this.setAttribute('aria-expanded', folded ? 'false' : 'true');
+    this.setAttribute('aria-label', folded ? 'Show the colony numbers' : 'Hide the colony numbers');
+  });
   $('i-close').addEventListener('click', closeInspector);
   $('i-follow').addEventListener('click', function () {
     renderer.follow = !renderer.follow;

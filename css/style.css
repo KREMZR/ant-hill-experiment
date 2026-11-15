@@ -67,6 +67,8 @@ button { cursor: pointer; }
 .reserve-bar { height: 5px; border-radius: 3px; background: rgba(255, 244, 222, 0.12); overflow: hidden; }
 .reserve-bar span { display: block; height: 100%; width: 0; background: var(--honey); border-radius: 3px; }
 
+.fold { display: none; }
+
 /* ---- buttons along the top right ---- */
 
 .corner { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -232,13 +234,19 @@ button { cursor: pointer; }
 /* ---- small screens ---- */
 
 @media (max-width: 760px) {
-  .colony { width: auto; right: auto; padding: 10px 12px; top: 10px; left: 10px; }
+  .colony { width: 198px; padding: 10px 12px 11px; top: 10px; left: 10px; font-size: 13px; }
   .colony h1 { font-size: 19px; }
-  .colony-sub { margin-bottom: 0; }
-  .colony .readout, .colony .reserve { display: none; }
-  .corner { top: 10px; right: 10px; left: 150px; }
+  .colony-sub { margin-bottom: 8px; font-size: 12px; }
+  .colony .readout div { padding: 2px 0; }
+  .colony .reserve { margin-top: 7px; padding-top: 8px; }
+  /* the numbers can be folded away to see more ground */
+  .fold { display: inline-grid; position: absolute; top: 6px; right: 6px; }
+  .colony.folded { width: auto; padding-right: 44px; }
+  .colony.folded .colony-sub { margin-bottom: 0; }
+  .colony.folded .readout, .colony.folded .reserve { display: none; }
+  .colony.folded .fold svg { transform: rotate(180deg); }
+  .corner { top: 10px; right: 10px; left: 216px; flex-direction: column; align-items: flex-end; gap: 6px; }
   .corner .pill { height: 30px; padding: 0 10px; font-size: 13px; }
-  #btn-new { display: none; }
   .dock { left: 8px; right: 8px; bottom: 8px; gap: 6px; }
   .tools { width: 100%; justify-content: space-between; }
   .tool { min-width: 0; flex: 1; padding: 6px 2px 5px; font-size: 11px; white-space: nowrap; }
@@ -247,7 +255,7 @@ button { cursor: pointer; }
   .inspector { top: auto; bottom: 138px; left: 8px; right: 8px; width: auto; padding: 10px 12px 12px; }
   .inspector .facts, .inspector .scent { display: none; }
   .doing { font-size: 17px; margin-bottom: 4px; min-height: 0; }
-  .toast { bottom: auto; top: 104px; }
+  .toast { bottom: auto; top: 226px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
